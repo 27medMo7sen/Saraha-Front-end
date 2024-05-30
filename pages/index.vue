@@ -1,8 +1,5 @@
-<script setup lang="ts">
-definePageMeta({
-  layout: "landing",
-});
-</script>
+<script setup lang="ts"></script>
+
 <template>
   <div class="font-ubuntu flex-col h-96">
     <h1 class="text-2xl font-bold m-5 >Welcome to Saraha">Welcome to Saraha</h1>
@@ -35,7 +32,7 @@ definePageMeta({
         class="relative -top-1 -left-1 bg-gray-800 py-2.5 px-5 hover:bg-lime-400 rounded-r-md hover:text-gray-800 font-medium uppercase text-white transition-all before:absolute before:top-1 before:left-1 before:-z-[1] before:h-full before:w-full before:border-2 before:rounded-r-md before:border-gray-700 before:transition-all before:content-[''] hover:top-0 hover:left-0 before:hover:top-0 before:hover:left-0"
         to="/login"
       >
-        login
+        <nuxt-link to="/login">login</nuxt-link>
       </button>
     </div>
   </div>
