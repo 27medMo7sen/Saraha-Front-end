@@ -1,11 +1,10 @@
 <template>
-  <div class="">
-    
-    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
+  <div class="z-0">
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg z-0">
       <div class="relative">
         <img
-          v-if="!coverPhotos || coverPhotos.length === 0"
-          :src="coverPhotosPlaceHolder[currentCoverIndex]"
+          v-if="!coverExists"
+          :src="coverPhotosPlaceHolder"
           alt="Cover Photo"
           class="w-full h-96 object-cover"
         />
@@ -13,18 +12,19 @@
           v-else
           :src="coverPhotos[currentCoverIndex]"
           alt="Cover Photo"
-          class="w-full h-96 object-cover"
+          class="w-full h-96 object-cover z-0"
         />
         <label
-        v-if="!isMine"
-          for="fileInputCover"
-          class="absolute top-2 left-2 p-2 rounded cursor-pointer"
-        >
-          <div
           v-if="!isMine"
-            class="absolute p-2 rounded cursor-pointer bg-neutral-700 border-spacing-2 text-white hover:bg-neutral-800 hover:text-white "
-          >
-            <IconsUpdate />
+          for="fileInputCover"
+          class="absolute top-2 left-2 rounded cursor-pointer"
+        >
+          <div v-if="!isMine" class="flex z-0">
+            <div
+              class="p-2 rounded cursor-pointer bg-neutral-700 border-spacing-2 text-white hover:bg-neutral-800 hover:text-white z-0"
+            >
+              <IconsAddCover />
+            </div>
           </div>
         </label>
         <input
@@ -32,26 +32,33 @@
           type="file"
           v-if="!isMine"
           ref="fileInputCover"
-          class="hidden"
+          class="hidden z-0"
           @change="updateCoverPhoto"
         />
-        <div class="absolute bottom-0 left-0 p-4">
+        <div
+          v-if="!isMine && coverPhotos.length > 0"
+          class="p-2 rounded cursor-pointer bg-neutral-700 border-spacing-2 text-white hover:bg-neutral-800 hover:text-white top-2 right-2 absolute z-0"
+          @click="deleteCoverPhoto"
+        >
+          <IconsDelete />
+        </div>
+        <div class="absolute bottom-0 left-0 p-4 z-0">
           <img
             v-if="!profilePhoto"
             :src="profilePhotoPlaceHolder"
             alt="Profile Photo"
-            class="w-40 h-40 rounded-full border-4 border-gray-800"
+            class="w-40 h-40 rounded-full border-4 border-gray-800 z-0"
           />
           <img
             v-else
             :src="profilePhoto"
             alt="Profile Photo"
-            class="w-40 h-40 rounded-full border-4 border-gray-800"
+            class="w-40 h-40 rounded-full border-4 border-gray-800 z-0"
           />
           <label for="fileInputProfile" class="cursor-pointer" v-if="!isMine">
             <span
-            v-if="!isMine"
-              class="absolute top-0 right-0 p-2 rounded cursor-pointer bg-neutral-700 border-spacing-2 text-white hover:bg-neutral-800 hover:text-white z-10"
+              v-if="!isMine"
+              class="absolute top-0 right-0 p-2 rounded cursor-pointer bg-neutral-700 border-spacing-2 text-white hover:bg-neutral-800 hover:text-white z-0"
             >
               <IconsUpdate />
             </span>
@@ -59,24 +66,25 @@
           <input
             id="fileInputProfile"
             type="file"
-            v-if"!isMine"
+            v-if="!isMine"
             ref="fileInputProfile"
-            class="hidden"
+            class="hidden z-0"
             @change="updateProfilePhoto"
           />
         </div>
         <div
-          class="absolute left-0 right-0 bottom-0 flex justify-center pb-4 z-10"
+          class="absolute left-0 right-0 bottom-0 flex gap-5 justify-center pb-4 z-0"
+          v-if="coverPhotos.length > 1"
         >
           <button
             @click="previousCover"
-            class="text-gray-800 text-3xl hover:text-gray-900 focus:outline-none"
+            class="text-amber-100 rounded-full text-3xl hover:text-gray-900 focus:outline-none z-0 bg-gray-600"
           >
             <IconsBackArrow />
           </button>
           <button
             @click="nextCover"
-            class="text-gray-800 text-3xl hover:text-gray-900 focus:outline-none"
+            class="text-amber-100 rounded-full text-3xl hover:text-gray-900 focus:outline-none z-0 bg-gray-600"
           >
             <IconsForwardArrow />
           </button>
@@ -87,29 +95,48 @@
         <h2 class="text-3xl font-semibold">{{ name }}</h2>
         <p class="text-lg text-gray-400">({{ username }})</p>
         <p class="text-gray-600 text-lg">{{ bio }}</p>
-        <div class="mt-4 flex w-1/3 justify-between">
-          <div class="flex gap-2 justify-center items-center">
+        <div class="mt-4 flex w-2/3 gap-8 z-0">
+          <div class="flex gap-2 justify-center items-center z-0">
             <IconsPhone /> {{ phoneNumber }}
           </div>
-          <div class="flex gap-2 justify-center items-center"> 
+          <div class="flex gap-2 justify-center items-center z-0">
             <IconsLocation /> {{ address }}
+          </div>
+          <div
+            class="flex gap-2 justify-center items-center z-0"
+            v-if="gender === 'male'"
+          >
+            <IconsMale /> male
+          </div>
+          <div
+            class="flex gap-2 justify-center items-center z-0"
+            v-if="gender === 'female'"
+          >
+            <IconsFemale /> female
           </div>
         </div>
         <!-- Action Buttons -->
-        <div class="mt-4 flex space-x-4"  v-if="isMine">
-         
+        <div class="mt-4 flex space-x-4 z-0" v-if="isMine">
           <button
             @click="follow"
-            class="bg-blue-500 text-white px-6 py-3 rounded-full"
+            class="bg-blue-500 text-white px-6 py-3 rounded-full z-0"
           >
             Follow
           </button>
-          <button
-            @click="message"
-            class="bg-green-500 text-white px-6 py-3 rounded-full"
+          <nuxt-link
+            :to="`/chat/public/${username}`"
+            class="bg-green-500 text-white px-6 py-3 rounded-full z-0"
           >
             Message
-          </button>
+          </nuxt-link>
+        </div>
+        <div v-else class="mt-4 flex space-x-4 z-0">
+          <nuxt-link
+            :to="`/user/update/${username}/`"
+            class="bg-green-500 text-white px-6 py-3 rounded-full z-0"
+          >
+            Update profile data
+          </nuxt-link>
         </div>
       </div>
     </div>
@@ -130,17 +157,16 @@ export default {
     return {
       name: "John Doe",
       username: "",
-      bio: "This is a short bio.",
+      bio: "",
       address: "",
       isMine: false,
       phoneNumber: "",
+      gender: "",
       profilePhotoPlaceHolder: "https://via.placeholder.com/150",
-      coverPhotosPlaceHolder: [
-        "https://via.placeholder.com/600x400",
-        "https://via.placeholder.com/600x401",
-      ],
+      coverPhotosPlaceHolder: "https://via.placeholder.com/600x400",
       profilePhoto: "",
       coverPhotos: [],
+      coverExists: false,
       currentCoverIndex: 0,
     };
   },
@@ -153,18 +179,25 @@ export default {
             headers: {
               Authorization: `Saraha ${this.token}`,
             },
+            withCredentials: true,
           }
         );
         console.log(res.data);
+
         if (res.data.user.profile_pic)
           this.profilePhoto = res.data.user.profile_pic.secure_url;
+
         this.name = `${res.data.user.firstname} ${res.data.user.lastname}`;
         this.username = res.data.user.username;
         this.bio = res.data.user.bio;
+        this.gender = res.data.user.gender;
         this.address = `${res.data.user.country}, ${res.data.user.state}`;
         this.phoneNumber = res.data.user.phoneNumber;
         console.log(res.data.user.token);
-        if(res.data.user.token===undefined||JSON.stringify(res.data.user.token) !== JSON.stringify(this.token)){
+        if (
+          res.data.user.token === undefined ||
+          JSON.stringify(res.data.user.token) !== JSON.stringify(this.token)
+        ) {
           this.isMine = true;
         }
         if (res.data.user.coverPictures !== undefined) {
@@ -175,6 +208,9 @@ export default {
             this.coverPhotos.push(key.secure_url);
           }
           this.currentCoverIndex = this.coverPhotos.length - 1;
+          if (this.coverPhotos.length > 0) {
+            this.coverExists = true;
+          }
         }
       } catch (err) {
         console.log(err);
@@ -198,15 +234,12 @@ export default {
               Authorization: `Saraha ${this.token}`,
               "Content-Type": "multipart/form-data",
             },
+            withCredentials: true,
           }
         );
         console.log(response);
         this.profilePhoto = response.data.profile_pic_url;
-        if (response.status == 201) {
-          Cookies.set("userToken", response.data.user.token, {
-            expires: 7,
-          });
-        }
+
         location.reload();
       } catch (error) {
         console.log("Error uploading file", error.response?.data || error);
@@ -220,7 +253,6 @@ export default {
 
       const formData = new FormData();
       formData.append("cover", fileInput);
-
       try {
         const response = await axios.post(
           "http://localhost:8000/user/coverPics",
@@ -230,15 +262,41 @@ export default {
               Authorization: `Saraha ${this.token}`,
               "Content-Type": "multipart/form-data",
             },
+            withCredentials: true,
           }
         );
+
         // Add the new cover photo to the coverPhotos array
         this.coverPhotos = response.data.userNew.coverPictures.map(
           (picture) => picture.secure_url
         );
         this.currentCoverIndex = this.coverPhotos.length - 1;
+        location.reload();
       } catch (error) {
         console.log("Error uploading file", error.response?.data || error);
+      }
+    },
+    async deleteCoverPhoto() {
+      console.log(this.coverPhotos[this.currentCoverIndex]);
+      try {
+        const response = await axios.delete(
+          "http://localhost:8000/user/deleteCover",
+          {
+            data: { secure_url: this.coverPhotos[this.currentCoverIndex] },
+            headers: {
+              Authorization: `Saraha ${this.token}`,
+            },
+            withCredentials: true,
+          }
+        );
+
+        this.coverPhotos.splice(this.currentCoverIndex, 1);
+        this.currentCoverIndex = 0;
+        if (this.coverPhotos.length === 0) {
+          this.coverExists = false;
+        }
+      } catch (error) {
+        console.log("Error deleting file", error.response?.data || error);
       }
     },
     follow() {
@@ -248,13 +306,15 @@ export default {
       // Logic to message the user
     },
     previousCover() {
-      this.currentCoverIndex =
-        (this.currentCoverIndex - 1 + this.coverPhotos.length) %
-        this.coverPhotos.length;
+      if (this.coverPhotos.length > 0)
+        this.currentCoverIndex =
+          (this.currentCoverIndex - 1 + this.coverPhotos.length) %
+          this.coverPhotos.length;
     },
     nextCover() {
-      this.currentCoverIndex =
-        (this.currentCoverIndex + 1) % this.coverPhotos.length;
+      if (this.coverPhotos.length > 0)
+        this.currentCoverIndex =
+          (this.currentCoverIndex + 1) % this.coverPhotos.length;
     },
   },
   mounted() {
@@ -262,17 +322,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-@keyframes love-animation {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.5);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-</style>

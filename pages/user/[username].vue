@@ -1,11 +1,10 @@
 <script setup></script>
 <template>
-  <div class="p-10">
+  <div class="p-10 z-0">
     <ProfileCard />
   </div>
 </template>
 <script>
-import axios from "axios";
 import Cookies from "js-cookie";
 export default {
   computed: {
