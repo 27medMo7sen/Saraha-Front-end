@@ -1,6 +1,8 @@
 <template>
-  <div class="bg-blue-500">
-    <nav class="relative px-4 py-4 flex justify-between items-center bg-white">
+  <div class="z-40">
+    <nav
+      class="relative px-4 py-4 flex justify-between items-center bg-white z-40"
+    >
       <nuxt-link to="/" class="text-3xl font-bold leading-none">
         <img
           src="/assets/Logo/png/logo-no-background.png"
@@ -10,7 +12,7 @@
       </nuxt-link>
       <div class="lg:hidden">
         <button
-          class="navbar-burger flex items-center text-blue-600 p-3"
+          class="navbar-burger flex items-center text-blue-600 p-3 z-40"
           @click="toggleMenu"
         >
           <svg
@@ -24,7 +26,7 @@
         </button>
       </div>
       <ul
-        class="hidden absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 lg:mx-auto lg:flex lg:items-center lg:w-auto lg:space-x-6"
+        class="hidden absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 lg:mx-auto lg:flex lg:items-center lg:w-auto lg:space-x-6 z-40"
       >
         <li>
           <nuxt-link
@@ -59,8 +61,8 @@
         <li class="text-gray-300">
           <IconsSeperator />
         </li>
-        <li class="text-gray-300 w-auto relative">
-          <form class="max-w-md mx-auto">
+        <li class="text-gray-300 w-auto relative z-40">
+          <form class="max-w-md mx-auto z-40">
             <label
               for="default-search"
               class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white z-40"
@@ -68,10 +70,10 @@
             >
             <div class="relative">
               <div
-                class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
+                class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none z-40"
               >
                 <svg
-                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400 z-40"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -93,6 +95,8 @@
                 class="flex w-96 p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 z-40"
                 placeholder="Search by username"
                 @input="searchUser"
+                autocapitalize="off"
+                autocomplete="off"
                 required
               />
             </div>
@@ -106,7 +110,7 @@
               v-for="user in searchResultsArr"
               :key="user"
               @click="goToUser(user)"
-              class="p-4 border-b text-gray-800 border-gray-200 hover:bg-gray-300 cursor-pointer transition duration-200 z-50"
+              class="p-4 border-b text-gray-800 border-gray-200 hover:bg-gray-300 cursor-pointer transition duration-200 z-40"
             >
               {{ user }}
             </div>
@@ -114,7 +118,7 @@
         </li>
       </ul>
       <nuxt-link
-        v-if="logedIn"
+        v-if="logedIn()"
         class="flex lg:inline-block lg:ml-auto lg:mr-3 py-2 px-6 bg-gray-50 hover:bg-gray-100 text-sm text-gray-900 font-bold rounded-xl transition duration-200"
         :to="`/user/${username}`"
         ><div class="flex gap-2 justify-center items-center">
@@ -122,14 +126,14 @@
         </div></nuxt-link
       >
       <nuxt-link
-        v-if="!logedIn"
+        v-if="!logedIn()"
         class="hidden lg:inline-block lg:ml-auto lg:mr-3 py-2 px-6 bg-gray-50 hover:bg-gray-100 text-sm text-gray-900 font-bold rounded-xl transition duration-200"
         to="/login"
         @click="changeColor(4)"
         >Sign In</nuxt-link
       >
       <nuxt-link
-        v-if="!logedIn"
+        v-if="!logedIn()"
         class="hidden lg:inline-block py-2 px-6 bg-blue-500 hover:bg-blue-600 text-sm text-white font-bold rounded-xl transition duration-200"
         to="/signup"
         @click="changeColor(4)"
@@ -237,7 +241,9 @@ import Cookies from "js-cookie";
 export default {
   computed: {
     token() {
-      return Cookies.get("userToken");
+      const token = Cookies.get("userToken");
+      console.log("done:", token);
+      return token;
     },
   },
   data() {
@@ -250,12 +256,9 @@ export default {
   },
   methods: {
     logedIn() {
-      return this.token !== undefined;
+      return this.token != undefined && this.token != null && this.token != "";
     },
-    redirect() {
-      if (this.logedIn) this.decodeToken();
-      else return;
-    },
+
     async decodeToken() {
       try {
         const res = await axios.get("http://localhost:8000/user/decodeToken", {
@@ -263,18 +266,22 @@ export default {
             Authorization: `Saraha ${this.token}`,
             "Content-Type": "multipart/form-data",
           },
+          withCredentials: true,
         });
-        if (res.status == 201) {
-          Cookies.set("userToken", res.data.user.token, {
-            expires: 7,
-          });
-        }
         console.log(res);
+        console.log(this.token);
+
         this.firstname = res.data.data.firstname;
         this.username = res.data.data.username;
       } catch (err) {
         console.log(err);
       }
+    },
+    async redirect() {
+      if (this.logedIn()) {
+        console.log("here");
+        await this.decodeToken();
+      } else return;
     },
     async searchUser() {
       try {
@@ -309,7 +316,7 @@ export default {
     },
   },
   mounted() {
-    if (this.username === "") this.redirect();
+    this.redirect();
   },
 };
 </script>

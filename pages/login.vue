@@ -97,36 +97,35 @@ export default {
     };
   },
   methods: {
-    login() {
+    async login() {
       this.isLoading = true;
       this.errors = {};
-      axios
-        .post(`http://localhost:8000/user/login`, this.user)
-        .then((res) => {
-          Cookies.set("userToken", res.data.userToken, {
-            expires: 7,
-          });
-          console.log(res.message);
-          console.log(this.token, "you've done it");
-          this.user.email = "";
-          this.user.password = "";
-          this.isLoading = false;
-          this.isLoadingTitle = "Loding...";
-          this.$router.push("/");
-        })
-        .catch((err) => {
-          console.log(err.response.data.message);
-          if (err.response.data.message.startsWith("password")) {
-            this.errors.password = err.response.data.message.substring(9);
-            this.password = "";
-          }
-          if (err.response.data.message.startsWith("email")) {
-            this.errors.email = err.response.data.message.substring(5);
-            this.email = "";
-            this.password = "";
-          }
-          this.isLoading = false;
-        });
+      try {
+        const res = await axios.post(
+          `http://localhost:8000/user/login`,
+          this.user,
+          { withCredentials: true }
+        );
+        console.log(res.data);
+        console.log(this.token, "you've done it");
+        this.user.email = "";
+        this.user.password = "";
+        this.isLoading = false;
+        this.isLoadingTitle = "Loding...";
+        this.$router.push("/");
+      } catch (err) {
+        console.log(err.response);
+        if (err.response.data.message.startsWith("password")) {
+          this.errors.password = err.response.data.message.substring(9);
+          this.password = "";
+        }
+        if (err.response.data.message.startsWith("email")) {
+          this.errors.email = err.response.data.message.substring(5);
+          this.email = "";
+          this.password = "";
+        }
+        this.isLoading = false;
+      }
     },
   },
 };

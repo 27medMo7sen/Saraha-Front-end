@@ -9,5 +9,10 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  modules: ["@vueuse/nuxt", "@nuxt/content", "@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: [
+    "@vueuse/nuxt",
+    "@nuxt/content",
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+  ],
 });
