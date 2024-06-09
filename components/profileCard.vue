@@ -51,7 +51,7 @@
           />
           <img
             v-else
-            :src="profilePhoto"
+            :src="transformToJpg(profilePhoto)"
             alt="Profile Photo"
             class="w-40 h-40 rounded-full border-4 border-gray-800 z-0"
           />
@@ -124,7 +124,7 @@
             Follow
           </button>
           <nuxt-link
-            :to="`/chat/public/${username}`"
+            :to="`/chat/public/${userId}`"
             class="bg-green-500 text-white px-6 py-3 rounded-full z-0"
           >
             Message
@@ -132,7 +132,7 @@
         </div>
         <div v-else class="mt-4 flex space-x-4 z-0">
           <nuxt-link
-            :to="`/user/update/${username}/`"
+            :to="`/user/update/${userId}/`"
             class="bg-green-500 text-white px-6 py-3 rounded-full z-0"
           >
             Update profile data
@@ -155,9 +155,10 @@ export default {
   },
   data() {
     return {
-      name: "John Doe",
+      name: "",
       username: "",
       bio: "",
+      userId: "",
       address: "",
       isMine: false,
       phoneNumber: "",
@@ -172,9 +173,10 @@ export default {
   },
   methods: {
     async fetchUser() {
+      // console.log(this.$route.params.userId);
       try {
         const res = await axios.get(
-          `http://localhost:8000/user/${this.$route.params.username}`,
+          `http://localhost:8000/user/${this.$route.params.userId}`,
           {
             headers: {
               Authorization: `Saraha ${this.token}`,
@@ -193,6 +195,7 @@ export default {
         this.gender = res.data.user.gender;
         this.address = `${res.data.user.country}, ${res.data.user.state}`;
         this.phoneNumber = res.data.user.phoneNumber;
+        this.userId = res.data.user.userId;
         console.log(res.data.user.token);
         if (
           res.data.user.token === undefined ||
@@ -238,12 +241,24 @@ export default {
           }
         );
         console.log(response);
-        this.profilePhoto = response.data.profile_pic_url;
-
+        const url = this.transformToJpg(
+          response.data.user.profile_pic.secure_url
+        );
+        this.profilePhoto = response.data.user.profile_pic.secure_url;
         location.reload();
       } catch (error) {
         console.log("Error uploading file", error.response?.data || error);
       }
+    },
+    transformToJpg(url) {
+      // This assumes the URL is a Cloudinary URL
+      const cloudinaryBaseUrl = "https://res.cloudinary.com/";
+      if (url.startsWith(cloudinaryBaseUrl)) {
+        // Insert the transformation parameter 'f_jpg' into the URL
+        const parts = url.split("/upload/");
+        return `${parts[0]}/upload/f_jpg/${parts[1]}`;
+      }
+      return url; // Return the original URL if it's not a Cloudinary URL
     },
     async updateCoverPhoto(event) {
       const fileInput = event.target.files[0];
@@ -322,3 +337,33 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.user {
+  width: 140px;
+  height: 140px;
+  border-radius: 100%;
+  border: 3px solid #2e7d32;
+  position: relative;
+}
+.profile-img {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
+.icon {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  background: #e2e2e2;
+  border-radius: 100%;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  vertical-align: middle;
+  text-align: center;
+  color: #0000ff;
+  font-size: 14px;
+  cursor: pointer;
+}
+</style>
