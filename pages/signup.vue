@@ -170,6 +170,7 @@
 </template>
 <script>
 import axios from "axios";
+import { io } from "socket.io-client";
 
 export default {
   data() {
@@ -193,14 +194,22 @@ export default {
       errors: {},
       countries: [],
       states: [],
+      socket: null,
     };
   },
   methods: {
     async fetchCountries() {
       try {
         console.log("fetching countries");
-        const res = await axios.get("https://restcountries.com/v3.1/all");
-        this.countries = res.data.map((country) => country.name.common);
+        const res = await axios.get(
+          "https://api.first.org/data/v1/countries?limit=300"
+        );
+        // this.countries = res.data.map((country) => country.country);
+        // console.log(this.countries);
+        console.log(res.data.data);
+        for (const key in res.data.data) {
+          this.countries.push(res.data.data[key].country);
+        }
         console.log(this.countries);
       } catch (err) {
         console.log(err.message);
@@ -211,9 +220,12 @@ export default {
       this.isLoadingTitle = "saving...";
       this.errors = {};
       try {
-        const res = axios.post(`http://localhost:8000/user`, this.user);
-        console.log(res.data, "done");
-
+        const res = await axios.post(`http://localhost:8000/user`, this.user, {
+          withCredentials: true,
+        });
+        console.log(res.data.user.userId, "done");
+        console.log(this.socket);
+        this.socket.emit("signUp", res.data.user.userId);
         this.$router.push("/login");
       } catch (err) {
         // this.errorsArr = err.response.data.Errors;
@@ -249,6 +261,17 @@ export default {
   },
   mounted() {
     this.fetchCountries();
+    this.socket = io("http://localhost:8000");
+
+    this.socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+    this.socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+    this.socket.on("messageFromServer", (data) => {
+      this.message = data;
+    });
   },
 };
 </script>

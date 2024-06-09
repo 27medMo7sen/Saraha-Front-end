@@ -1,39 +1,121 @@
-<script setup lang="ts"></script>
-
 <template>
-  <div class="font-ubuntu flex-col h-96">
-    <h1 class="text-2xl font-bold m-5 >Welcome to Saraha">Welcome to Saraha</h1>
-    <div class="flex h-80 w-auto justify-center items-center">
-      <img
-        src="@/assets/Logo/png/saraha-favicon-color.png"
-        alt="Saraha Logo"
-        class="h-24 self-end animate-bounce"
-      />
-      <div
-        class="flex justify-center text-center bg-gray-800 text-gray-200 rounded-lg h-2/5 w-1/2 p-4"
-      >
-        <p class="">
-          Discover Saraha: Where anonymity meets connection. Send anonymous
-          messages, share hints, and spark conversations with friends.signup or
-          login if you allready have an account to unlock features like
-          searching for and connecting with your friends. Use hints to drop
-          subtle clues or share secrets anonymously. Join us today and start
-          sharing your thoughts anonymously.
-        </p>
-      </div>
-    </div>
-    <div class="flex justify-center items-center gap-2">
-      <button
-        class="relative -top-1 -left-1 hover:bg-emerald-300 rounded-l-md hover:text-gray-800 bg-gray-800 py-2.5 px-5 font-medium uppercase text-white transition-all before:absolute before:top-1 before:left-1 before:-z-[1] before:h-full before:w-full before:border-2 before:rounded-l-md before:border-gray-700 before:transition-all before:content-[''] hover:top-0 hover:left-0 before:hover:top-0 before:hover:left-0"
-      >
-        <nuxt-link to="/signup">Signup</nuxt-link>
-      </button>
-      <button
-        class="relative -top-1 -left-1 bg-gray-800 py-2.5 px-5 hover:bg-lime-400 rounded-r-md hover:text-gray-800 font-medium uppercase text-white transition-all before:absolute before:top-1 before:left-1 before:-z-[1] before:h-full before:w-full before:border-2 before:rounded-r-md before:border-gray-700 before:transition-all before:content-[''] hover:top-0 hover:left-0 before:hover:top-0 before:hover:left-0"
-        to="/login"
-      >
-        <nuxt-link to="/login">login</nuxt-link>
-      </button>
+  <div class="main-page font-ubuntu">
+    <div v-if="logedIn()" class="content-wrapper">
+      <CombinedFriendsCards class="left-pane" />
     </div>
   </div>
 </template>
+<script lang="ts">
+import { defineComponent } from "vue";
+import { io, Socket } from "socket.io-client";
+import Cookies from "js-cookie";
+
+export default defineComponent({
+  computed: {
+    userId() {
+      return Cookies.get("userId");
+    },
+  },
+  data() {
+    return {
+      socket: null as Socket | null,
+      message: "",
+      token: "",
+    };
+  },
+  mounted() {
+    // this.socket = io("http://localhost:8000");
+    // this.socket.on("connect", () => {
+    //   console.log("Connected to server");
+    //   this.socket?.emit("join", { userId: this.userId });
+    // });
+    // this.socket.on("disconnect", () => {
+    //   console.log("Disconnected from server");
+    // });
+    // this.socket.on("messageFromServer", (data: string) => {
+    //   this.message = data;
+    // });
+  },
+  methods: {
+    logedIn() {
+      console.log("yes ", this.token);
+      const token = Cookies.get("userToken");
+      console.log("done:", token);
+      if (token) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
+});
+</script>
+
+<style scoped>
+.main-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh; /* Full height of the viewport */
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 80%; /* Take up most of the viewport height */
+}
+
+.left-pane {
+  flex: 0 0 450px; /* Ensure the left pane does not shrink or grow */
+}
+
+.right-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.description-box {
+  background-color: #333;
+  color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  width: 50%;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.signup-button,
+.login-button {
+  position: relative;
+  top: -1px;
+  left: -1px;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.signup-button:hover {
+  background-color: #00d084;
+  color: #333;
+}
+
+.login-button:hover {
+  background-color: #00d084;
+  color: #333;
+}
+</style>

@@ -101,134 +101,45 @@
               />
             </div>
           </form>
-          <!-- Search Results -->
           <div
             v-if="searchResultsArr.length"
             class="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-40"
           >
             <div
               v-for="user in searchResultsArr"
-              :key="user"
-              @click="goToUser(user)"
+              :key="user.userId"
+              @click="goToUser(user.userId)"
               class="p-4 border-b text-gray-800 border-gray-200 hover:bg-gray-300 cursor-pointer transition duration-200 z-40"
             >
-              {{ user }}
+              {{ user.username }}
             </div>
           </div>
         </li>
       </ul>
       <nuxt-link
-        v-if="logedIn()"
+        v-if="logedIn"
         class="flex lg:inline-block lg:ml-auto lg:mr-3 py-2 px-6 bg-gray-50 hover:bg-gray-100 text-sm text-gray-900 font-bold rounded-xl transition duration-200"
-        :to="`/user/${username}`"
-        ><div class="flex gap-2 justify-center items-center">
-          <IconsProfile /> Hello, {{ firstname }}
-        </div></nuxt-link
+        :to="`/user/${userId}`"
       >
+        <div class="flex gap-2 justify-center items-center">
+          <IconsProfile /> Hello, {{ firstname }}
+        </div>
+      </nuxt-link>
       <nuxt-link
-        v-if="!logedIn()"
+        v-if="!logedIn"
         class="hidden lg:inline-block lg:ml-auto lg:mr-3 py-2 px-6 bg-gray-50 hover:bg-gray-100 text-sm text-gray-900 font-bold rounded-xl transition duration-200"
         to="/login"
         @click="changeColor(4)"
         >Sign In</nuxt-link
       >
       <nuxt-link
-        v-if="!logedIn()"
+        v-if="!logedIn"
         class="hidden lg:inline-block py-2 px-6 bg-blue-500 hover:bg-blue-600 text-sm text-white font-bold rounded-xl transition duration-200"
         to="/signup"
         @click="changeColor(4)"
         >Sign up</nuxt-link
       >
     </nav>
-    <div class="navbar-menu relative z-50 hidden">
-      <div class="navbar-backdrop fixed inset-0 bg-gray-800 opacity-25"></div>
-      <nav
-        class="fixed top-0 left-0 bottom-0 flex flex-col w-5/6 max-w-sm py-6 px-6 bg-white border-r overflow-y-auto"
-      >
-        <div class="flex items-center mb-8">
-          <nuxt-link class="mr-auto text-3xl font-bold leading-none" to="/">
-            <img
-              src="/assets/Logo/png/logo-no-background.png"
-              class="h-7"
-              alt="logo"
-              viewBox="0 0 10240 10240"
-            />
-          </nuxt-link>
-          <button class="navbar-close" @click="toggleMenu">
-            <svg
-              class="h-6 w-6 text-gray-400 cursor-pointer hover:text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
-        </div>
-        <div>
-          <ul>
-            <li class="mb-1">
-              <nuxt-link
-                class="block p-4 text-sm font-semibold text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded"
-                to="#"
-                >Home</nuxt-link
-              >
-            </li>
-            <li class="mb-1">
-              <nuxt-link
-                class="block p-4 text-sm font-semibold text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded"
-                to="#"
-                >About Us</nuxt-link
-              >
-            </li>
-            <li class="mb-1">
-              <nuxt-link
-                class="block p-4 text-sm font-semibold text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded"
-                to="#"
-                >Services</nuxt-link
-              >
-            </li>
-            <li class="mb-1">
-              <nuxt-link
-                class="block p-4 text-sm font-semibold text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded"
-                to="#"
-                >Pricing</nuxt-link
-              >
-            </li>
-            <li class="mb-1">
-              <nuxt-link
-                class="block p-4 text-sm font-semibold text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded"
-                to="#"
-                >Contact</nuxt-link
-              >
-            </li>
-          </ul>
-        </div>
-        <div class="mt-auto">
-          <div class="pt-6">
-            <a
-              class="block px-4 py-3 mb-3 leading-loose text-xs text-center font-semibold bg-gray-50 hover:bg-gray-100 rounded-xl"
-              href="#"
-              >Sign in</a
-            >
-            <a
-              class="block px-4 py-3 mb-2 leading-loose text-xs text-center text-white font-semibold bg-blue-600 hover:bg-blue-700 rounded-xl"
-              href="#"
-              >Sign Up</a
-            >
-          </div>
-          <p class="my-4 text-xs text-center text-gray-400">
-            <span>Copyright © 2021</span>
-          </p>
-        </div>
-      </nav>
-    </div>
   </div>
   <slot />
 </template>
@@ -236,29 +147,30 @@
 <script>
 import axios from "axios";
 import Cookies from "js-cookie";
-// import jwt from "jsonwebtoken";
-// import * as jwt_decode from "jwt-decode";
+
 export default {
-  computed: {
-    token() {
-      const token = Cookies.get("userToken");
-      console.log("done:", token);
-      return token;
-    },
-  },
   data() {
     return {
       username: "",
       searchUsername: "",
+      userId: "",
       firstname: "",
       searchResultsArr: [],
+      loading: true,
+      activeLink: null,
     };
   },
-  methods: {
-    logedIn() {
-      return this.token != undefined && this.token != null && this.token != "";
+  computed: {
+    token() {
+      return Cookies.get("userToken");
     },
-
+    logedIn() {
+      return (
+        this.token !== undefined && this.token !== null && this.token !== ""
+      );
+    },
+  },
+  methods: {
     async decodeToken() {
       try {
         const res = await axios.get("http://localhost:8000/user/decodeToken", {
@@ -268,20 +180,20 @@ export default {
           },
           withCredentials: true,
         });
-        console.log(res);
-        console.log(this.token);
-
+        this.userId = res.data.data.userId;
         this.firstname = res.data.data.firstname;
         this.username = res.data.data.username;
+        this.loading = false;
       } catch (err) {
         console.log(err);
       }
     },
     async redirect() {
-      if (this.logedIn()) {
-        console.log("here");
+      if (this.logedIn) {
         await this.decodeToken();
-      } else return;
+      } else {
+        this.loading = false;
+      }
     },
     async searchUser() {
       try {
@@ -290,26 +202,15 @@ export default {
             username: this.searchUsername,
           },
         });
-        this.searchResultsArr = [];
-        if (this.searchUsername === "") return;
-        for (const key in res.data.users) {
-          this.searchResultsArr.push(res.data.users[key].username);
-        }
-        console.log(this.searchResultsArr);
+        this.searchResultsArr = res.data.users;
       } catch (err) {
         console.log(err.response);
       }
     },
-    async goToUser(user) {
+    async goToUser(userId) {
       this.searchUsername = "";
       this.searchResultsArr = [];
-      this.$router.push({ path: `/user/${user}` });
-    },
-    toggleMenu() {
-      const menu = document.querySelectorAll(".navbar-menu");
-      for (var j = 0; j < menu.length; j++) {
-        menu[j].classList.toggle("hidden");
-      }
+      this.$router.push({ path: `/user/${userId}` });
     },
     changeColor(index) {
       this.activeLink = index;
@@ -322,5 +223,5 @@ export default {
 </script>
 
 <style scoped>
-/* Add your custom styles here */
+/* Add your scoped styles here */
 </style>
