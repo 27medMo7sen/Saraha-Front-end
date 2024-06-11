@@ -5,7 +5,7 @@
       <li v-if="loading"><IconsSpinner /></li>
       <li
         v-else-if="chats.length"
-        v-for="chat in chats"
+        v-for="chat in reformChats"
         :key="chat.userId"
         class=""
       >
@@ -42,7 +42,7 @@
               class="flex-col justify-center items-center"
             >
               <p class="text-sm text-black">
-                {{ chat.updatedAt.slice(11, 16) }}
+                {{ chat.updatedAt }}
               </p>
               <div class="flex justify-center items-center">
                 <p
@@ -52,9 +52,9 @@
                 </p>
               </div>
             </div>
-            <div v-else class="flex-col justify-center items-center">
-              <p class="text-sm text-gray-500">
-                {{ chat.updatedAt.slice(11, 16) }}
+            <div v-else class="flex w-20 justify-center items-center">
+              <p class="text-sm inline text-gray-500">
+                {{ chat.updatedAt }}
               </p>
             </div>
           </div>
@@ -73,6 +73,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import io from "socket.io-client";
+import dayjs from "dayjs";
+
 export default {
   computed: {
     token() {
@@ -80,6 +82,26 @@ export default {
     },
     userId() {
       return Cookies.get("userId");
+    },
+    reformChats() {
+      const refomedChats = [];
+      for (let i = 0; i < this.chats.length; i++) {
+        const chat = this.chats[i];
+        const today = dayjs().format("YYYY-MM-DD");
+        const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+        const chatDate = dayjs(chat.updatedAt.slice(0, 10)).format(
+          "YYYY-MM-DD"
+        );
+        if (chatDate === today) {
+          chat.updatedAt = chat.updatedAt.slice(11, 16);
+        } else if (chatDate === yesterday) {
+          chat.updatedAt = "yesterday";
+        } else {
+          chat.updatedAt = chatDate;
+        }
+        refomedChats.push(chat);
+      }
+      return refomedChats;
     },
   },
   data() {
@@ -131,6 +153,11 @@ export default {
       console.log("Disconnected from server");
     });
   },
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
   methods: {
     chatRedirect(userId) {
       this.$router.push(`/chat/public/${userId}`);
@@ -145,8 +172,7 @@ export default {
   border-radius: 8px;
   padding: 16px;
   height: 470px;
-  max-width: 400px;
-  width: 500px;
+  width: 420px;
   margin: 0 auto;
   background-color: #0c0808;
 }

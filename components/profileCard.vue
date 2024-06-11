@@ -45,7 +45,7 @@
         <div class="absolute bottom-0 left-0 p-4 z-0">
           <img
             v-if="!profilePhoto"
-            :src="profilePhotoPlaceHolder"
+            src="@/assets/placeholder/image.png"
             alt="Profile Photo"
             class="w-40 h-40 rounded-full border-4 border-gray-800 z-0"
           />
@@ -163,7 +163,6 @@ export default {
       isMine: false,
       phoneNumber: "",
       gender: "",
-      profilePhotoPlaceHolder: "https://via.placeholder.com/150",
       coverPhotosPlaceHolder: "https://via.placeholder.com/600x400",
       profilePhoto: "",
       coverPhotos: [],

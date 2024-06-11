@@ -10,7 +10,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px; /* Gap between the cards */
-  width: 450px; /* Adjust the width as needed */
+  width: 100%; /* Adjust the width as needed */
   height: 100vh; /* Full height of the viewport */
   padding: 16px; /* Padding around the card container */
   background-color: #f4f4f4; /* Background color for the card container */
