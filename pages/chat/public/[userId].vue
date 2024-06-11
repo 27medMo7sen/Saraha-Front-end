@@ -32,26 +32,36 @@
       >
         <ul id="mesgs" class="space-y-2 w-full">
           <li
-            v-for="(message, index) in messages"
+            v-for="(message, index) in sepratedMessages"
             :key="index"
             :class="{
-              'bg-gray-200 text-black self-start': message.sender === userId,
-              'bg-black text-white self-end': message.sender !== userId,
+              'w-full h-9  flex justify-center items-center': message.day,
+              'p-2 rounded-lg w-auto min-w-36 max-w-96 break-words bg-gray-200 text-black self-start':
+                !message.day && message.sender === userId,
+              'p-2 rounded-lg w-auto min-w-36 max-w-96 break-words bg-black text-white self-end':
+                !message.day && message.sender !== userId,
             }"
-            class="p-2 rounded-lg w-auto min-w-36 max-w-96 break-words"
           >
-            {{ message.message }}
             <div
-              v-if="message.sender !== userId"
-              class="text-sm w-full pt-4 flex justify-end"
+              v-if="message.day"
+              class="w-auto h-9 flex justify-center items-center rounded-xl bg-gray-300"
             >
-              <div class="bg-gray-800 inline rounded-lg">
-                {{ message.sentAt.slice(11, 16) }}
-              </div>
+              <div class="text-black px-2">{{ message.day }}</div>
             </div>
-            <div v-else class="text-sm w-full pt-4 flex justify-end">
-              <div class="bg-gray-100 inline rounded-lg">
-                {{ message.sentAt.slice(11, 16) }}
+            <div v-else>
+              {{ message.message }}
+              <div
+                v-if="message.sender !== userId"
+                class="text-sm w-full pt-4 flex justify-end"
+              >
+                <div class="bg-gray-800 inline rounded-lg">
+                  {{ message.sentAt.slice(11, 16) }}
+                </div>
+              </div>
+              <div v-else class="text-sm w-full pt-4 flex justify-end">
+                <div class="bg-gray-100 inline rounded-lg">
+                  {{ message.sentAt.slice(11, 16) }}
+                </div>
               </div>
             </div>
           </li>
@@ -92,7 +102,7 @@ import io from "socket.io-client";
 import Cookies from "js-cookie";
 import axios from "axios";
 import "emoji-picker-element";
-
+import dayjs from "dayjs";
 export default {
   computed: {
     token() {
@@ -100,6 +110,50 @@ export default {
     },
     myUserId() {
       return Cookies.get("userId");
+    },
+    sepratedMessages() {
+      if (this.messages.length === 0) return [];
+      const sepratedMessages = [];
+      for (let i = 0; i < this.messages.length; i++) {
+        if (i === 0) {
+          const day = dayjs(this.messages[i].sentAt.slice(0, 10)).format(
+            "YYYY-MM-DD"
+          );
+          console.log(day);
+          if (day === dayjs().format("YYYY-MM-DD")) {
+            sepratedMessages.push({ day: "Today" });
+          } else if (day === dayjs().subtract(1, "day").format("YYYY-MM-DD")) {
+            sepratedMessages.push({ day: "Yesterday" });
+          } else {
+            sepratedMessages.push({ day });
+          }
+          sepratedMessages.push([this.messages[i]]);
+        } else {
+          const prevDay = dayjs(
+            this.messages[i - 1].sentAt.slice(0, 10)
+          ).format("YYYY-MM-DD");
+          const day = dayjs(this.messages[i].sentAt.slice(0, 10)).format(
+            "YYYY-MM-DD"
+          );
+          if (day === prevDay) {
+            sepratedMessages[sepratedMessages.length - 1].push(
+              this.messages[i]
+            );
+          } else {
+            if (day === dayjs().format("YYYY-MM-DD")) {
+              sepratedMessages.push({ day: "Today" });
+            } else if (
+              day === dayjs().subtract(1, "day").format("YYYY-MM-DD")
+            ) {
+              sepratedMessages.push({ day: "Yesterday" });
+            } else {
+              sepratedMessages.push({ day });
+            }
+            sepratedMessages.push([this.messages[i]]);
+          }
+        }
+      }
+      return sepratedMessages.flat();
     },
   },
   data() {
@@ -120,17 +174,29 @@ export default {
       console.log("Connected to server");
       this.socket.emit("join", { userId: this.myUserId });
     });
-    this.socket.on("areYouHere", () => {
-      console.log("I am here");
-      this.socket.emit("iAmHere");
+    this.socket.on("areYouHere", ({ userId }) => {
+      if (userId === this.userId) {
+        console.log("I am here");
+        this.socket.emit("iAmHere");
+      }
     });
-    this.socket.on("chatMessage", ({ message, sender, sentAt }) => {
-      this.messages.push({ message, sender, sentAt, read: true });
-      console.log(message, sentAt, sender);
-      this.scrollToBottom();
+    this.socket.on("chatMessage", ({ message, sender, receiver, sentAt }) => {
+      if (
+        (receiver === this.myUserId && sender === this.userId) ||
+        (receiver === this.userId && sender === this.myUserId)
+      ) {
+        this.messages.push({ message, sender, receiver, sentAt, read: true });
+        console.log(message, sentAt, receiver, sender, "1111111111111");
+        this.scrollToBottom();
+      }
     });
     this.fetchUser();
     this.getCaht();
+  },
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   methods: {
     async fetchUser() {
@@ -208,11 +274,6 @@ export default {
     },
     addEmoji(event) {
       this.input += event.detail.unicode;
-    },
-    beforeDestroy() {
-      if (this.socket) {
-        this.socket.disconnect();
-      }
     },
   },
 };

@@ -20,26 +20,36 @@
       >
         <ul id="mesgs" class="space-y-2 w-full">
           <li
-            v-for="(message, index) in messages"
+            v-for="(message, index) in separatedMessages"
             :key="index"
             :class="{
-              'bg-gray-200 text-black self-start': message.sender !== userId,
-              'bg-black text-white self-end': message.sender === userId,
+              'w-full h-9 flex justify-center items-center': message.day,
+              'p-2 rounded-lg w-auto min-w-36 max-w-96 break-words bg-gray-200 text-black self-start':
+                !message.day && message.sender !== userId,
+              'p-2 rounded-lg w-auto min-w-36 max-w-96 break-words bg-black text-white self-end':
+                !message.day && message.sender === userId,
             }"
-            class="p-2 rounded-lg w-auto min-w-36 max-w-96 break-words"
           >
-            {{ message.message }}
             <div
-              v-if="message.sender === userId"
-              class="text-sm w-full pt-4 flex justify-start"
+              v-if="message.day"
+              class="w-auto h-9 flex justify-center items-center rounded-xl bg-gray-300"
             >
-              <div class="bg-gray-800 inline rounded-lg">
-                {{ message.sentAt.slice(11, 16) }}
-              </div>
+              <div class="text-black px-2">{{ message.day }}</div>
             </div>
-            <div v-else class="text-sm w-full pt-4 flex justify-start">
-              <div class="bg-gray-100 inline rounded-lg">
-                {{ message.sentAt.slice(11, 16) }}
+            <div v-else>
+              {{ message.message }}
+              <div
+                v-if="message.sender === userId"
+                class="text-sm w-full pt-4 flex justify-end"
+              >
+                <div class="bg-gray-800 inline rounded-lg">
+                  {{ message.sentAt.slice(11, 16) }}
+                </div>
+              </div>
+              <div v-else class="text-sm w-full pt-4 flex justify-end">
+                <div class="bg-gray-100 inline rounded-lg">
+                  {{ message.sentAt.slice(11, 16) }}
+                </div>
               </div>
             </div>
           </li>
@@ -79,6 +89,7 @@ import io from "socket.io-client";
 import Cookies from "js-cookie";
 import axios from "axios";
 import "emoji-picker-element";
+import dayjs from "dayjs";
 
 export default {
   computed: {
@@ -87,6 +98,45 @@ export default {
     },
     myUserId() {
       return Cookies.get("userId");
+    },
+    separatedMessages() {
+      if (this.messages.length === 0) return [];
+      const separatedMessages = [];
+      for (let i = 0; i < this.messages.length; i++) {
+        if (i === 0) {
+          const day = dayjs(this.messages[i].sentAt.slice(0, 10)).format(
+            "YYYY-MM-DD"
+          );
+          if (day === dayjs().format("YYYY-MM-DD")) {
+            separatedMessages.push({ day: "Today" });
+          } else if (day === dayjs().subtract(1, "day").format("YYYY-MM-DD")) {
+            separatedMessages.push({ day: "Yesterday" });
+          } else {
+            separatedMessages.push({ day });
+          }
+          separatedMessages.push(this.messages[i]);
+        } else {
+          const prevDay = dayjs(
+            this.messages[i - 1].sentAt.slice(0, 10)
+          ).format("YYYY-MM-DD");
+          const day = dayjs(this.messages[i].sentAt.slice(0, 10)).format(
+            "YYYY-MM-DD"
+          );
+          if (day !== prevDay) {
+            if (day === dayjs().format("YYYY-MM-DD")) {
+              separatedMessages.push({ day: "Today" });
+            } else if (
+              day === dayjs().subtract(1, "day").format("YYYY-MM-DD")
+            ) {
+              separatedMessages.push({ day: "Yesterday" });
+            } else {
+              separatedMessages.push({ day });
+            }
+          }
+          separatedMessages.push(this.messages[i]);
+        }
+      }
+      return separatedMessages;
     },
   },
   data() {
@@ -104,14 +154,29 @@ export default {
       console.log("Connected to server");
       this.socket.emit("join", { userId: this.myUserId });
     });
-
-    this.socket.on("chatMessage", ({ message, sender, sentAt }) => {
-      this.messages.push({ message, sender, sentAt });
-      console.log(message, sender, sentAt);
-      this.scrollToBottom();
+    this.socket.on("areYouHere", ({ userId }) => {
+      if (userId === this.$route.params.userId) {
+        console.log("I am here");
+        this.socket.emit("iAmHere");
+      }
     });
-    this.getCaht();
+    this.socket.on("chatMessage", ({ message, sender, receiver, sentAt }) => {
+      if (
+        (receiver === this.myUserId && sender === this.$route.params.userId) ||
+        (receiver === this.$route.params.userId && sender === this.myUserId)
+      ) {
+        this.messages.push({ message, sender, receiver, sentAt, read: true });
+        console.log(message, sentAt, receiver, sender);
+        this.scrollToBottom();
+      }
+    });
+    this.getChat();
     this.decodeToken();
+  },
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   methods: {
     async decodeToken() {
@@ -124,7 +189,6 @@ export default {
           withCredentials: true,
         });
         console.log(res);
-        console.log(this.token);
         this.userId = res.data.data.userId;
       } catch (err) {
         console.log(err);
@@ -153,7 +217,7 @@ export default {
         console.error(error);
       }
     },
-    async getCaht() {
+    async getChat() {
       try {
         const res = await axios.get(
           `http://localhost:8000/chat/private/${this.$route.params.userId}`,
@@ -164,23 +228,11 @@ export default {
             withCredentials: true,
           }
         );
-        console.log(res.data.chat.messages);
-        // for (const chat of res.data.chat.messages) {
-        //   const append = {
-        //     message: JSON.parse(JSON.stringify(chat.message)),
-        //     sender: JSON.parse(JSON.stringify(chat.sender)),
-        //     _id: JSON.parse(JSON.stringify(chat._id)),
-        //   };
-        //   this.messages.push(append);
-        // }
+        console.log(this.$route.params.userId);
         this.messages = res.data.chat.messages;
         this.$nextTick(() => {
           this.scrollToBottom();
         });
-        // console.log(this.messages[0].sender);
-        // for (const message of this.messages) {
-        //   console.log(message.sender);
-        // }
       } catch (error) {
         console.error(error);
       }

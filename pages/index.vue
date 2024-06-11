@@ -36,6 +36,11 @@ export default defineComponent({
     //   this.message = data;
     // });
   },
+  beforeDestroy() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
   methods: {
     logedIn() {
       console.log("yes ", this.token);

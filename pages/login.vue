@@ -107,7 +107,7 @@ export default {
           { withCredentials: true }
         );
         console.log(res, "dafsdfasdfafsd");
-        Cookies.set("userId", res.data.user.userId);
+
         console.log(this.token, "you've done it");
         this.user.email = "";
         this.user.password = "";
