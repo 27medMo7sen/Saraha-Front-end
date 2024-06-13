@@ -96,10 +96,16 @@
         <p class="text-lg text-gray-400">({{ username }})</p>
         <p class="text-gray-600 text-lg">{{ bio }}</p>
         <div class="mt-4 flex w-2/3 gap-8 z-0">
-          <div class="flex gap-2 justify-center items-center z-0">
+          <div
+            v-if="phoneNumber !== ''"
+            class="flex gap-2 justify-center items-center z-0"
+          >
             <IconsPhone /> {{ phoneNumber }}
           </div>
-          <div class="flex gap-2 justify-center items-center z-0">
+          <div
+            v-if="address !== '' && address !== null"
+            class="flex gap-2 justify-center items-center z-0"
+          >
             <IconsLocation /> {{ address }}
           </div>
           <div
@@ -192,7 +198,15 @@ export default {
         this.username = res.data.user.username;
         this.bio = res.data.user.bio;
         this.gender = res.data.user.gender;
-        this.address = `${res.data.user.country}, ${res.data.user.state}`;
+        if (
+          res.data.user.country !== undefined &&
+          res.data.user.country !== "" &&
+          res.data.user.state !== undefined &&
+          res.data.user.state !== ""
+        ) {
+          this.address = `${res.data.user.country}, ${res.data.user.state}`;
+        }
+        console.log(this.address);
         this.phoneNumber = res.data.user.phoneNumber;
         this.userId = res.data.user.userId;
         console.log(res.data.user.token);
@@ -226,7 +240,7 @@ export default {
 
       const formData = new FormData();
       formData.append("profile", fileInput);
-
+      console.log("1111111111");
       try {
         const response = await axios.post(
           "http://localhost:8000/user/profilePic",
@@ -249,6 +263,7 @@ export default {
         console.log("Error uploading file", error.response?.data || error);
       }
     },
+
     transformToJpg(url) {
       // This assumes the URL is a Cloudinary URL
       const cloudinaryBaseUrl = "https://res.cloudinary.com/";
