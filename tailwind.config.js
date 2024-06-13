@@ -9,7 +9,16 @@ export default {
   ],
 
   theme: {
-    extend: {},
+    extend: {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3490dc",
+            "primary-dark": "#2779bd",
+          },
+        },
+      },
+    },
     fontFamily: {
       bitter: ["Bitter", "serif"],
       ubuntu: ["Ubuntu", "sans-serif"],
