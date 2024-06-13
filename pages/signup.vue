@@ -6,126 +6,184 @@
       class="h-24 self-center animate-bounce"
     />
     <div class="flex justify-center items-center h-screen">
-      <div class="bg-gray-800 rounded-lg p-8 w-full max-w-md">
+      <div class="bg-gray-800 rounded-lg p-4 w-full max-w-lg">
         <div v-if="isLoading" class="font-ubuntu text-white">
           <IconsSpinner /><span>Almost done...</span>
         </div>
         <div v-else>
-          <form @submit.prevent="saveUser" class="space-y-6">
-            <div class="space-y-6">
-              <div class="flex items-center space-x-4">
-                <label for="firstname" class="text-gray-300 w-1/3 text-right"
-                  >First name</label
-                >
-                <input
-                  id="firstname"
-                  type="text"
-                  v-model="user.firstname"
-                  placeholder="Enter your first name"
-                  class="input flex-1"
-                />
+          <form @submit.prevent="saveUser" class="space-y-4">
+            <div class="space-y-2">
+              <div class="flex space-x-2">
+                <div class="w-1/2">
+                  <label
+                    for="firstname"
+                    class="text-gray-300 block text-left mb-1"
+                    >First name<span class="text-red-400">*</span></label
+                  >
+                  <input
+                    id="firstname"
+                    type="text"
+                    v-model="user.firstname"
+                    placeholder="Enter your first name"
+                    class="input w-full"
+                    required="required"
+                  />
+                </div>
+                <div class="w-1/2">
+                  <label
+                    for="lastname"
+                    class="text-gray-300 block text-left mb-1"
+                    >Last name<span class="text-red-400">*</span></label
+                  >
+                  <input
+                    id="lastname"
+                    type="text"
+                    v-model="user.lastname"
+                    placeholder="Enter your last (family) name"
+                    class="input w-full"
+                    required="required"
+                  />
+                </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="lastname" class="text-gray-300 w-1/3 text-right"
-                  >Last name</label
-                >
-                <input
-                  id="lastname"
-                  type="text"
-                  v-model="user.lastname"
-                  placeholder="Enter your last (family) name"
-                  class="input flex-1"
-                />
-              </div>
-              <div class="flex items-center space-x-4">
-                <label for="username" class="text-gray-300 w-1/3 text-right"
-                  >User name</label
+              <div>
+                <label for="username" class="text-gray-300 block text-left mb-1"
+                  >User name<span class="text-red-400">*</span></label
                 >
                 <input
                   id="username"
                   type="text"
                   v-model="user.username"
                   placeholder="Example_User123"
-                  class="input flex-1"
+                  class="input w-full"
+                  required="required"
                 />
+                <div class="text-red-300 text-xs italic">
+                  {{ errors.username }}
+                </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="email" class="text-gray-300 w-1/3 text-right"
-                  >Email</label
+              <div>
+                <label
+                  for="anonymousname"
+                  class="text-gray-300 block text-left mb-1"
+                  >Anonymous name<span class="text-red-400">*</span></label
+                >
+                <input
+                  id="anonymousname"
+                  type="text"
+                  v-model="user.anonymousname"
+                  placeholder="Enter your anonymous name"
+                  class="input w-full"
+                  required="required"
+                />
+                <div class="text-red-300 text-xs italic">
+                  {{ errors.anonymousname }}
+                </div>
+              </div>
+              <div>
+                <label for="email" class="text-gray-300 block text-left mb-1"
+                  >Email<span class="text-red-400">*</span></label
                 >
                 <input
                   id="email"
                   type="text"
                   v-model="user.email"
                   placeholder="example@gmail.com"
-                  class="input flex-1"
+                  class="input w-full"
+                  required="required"
                 />
+                <div class="text-red-300 text-xs italic">
+                  {{ errors.email }}
+                </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="password" class="text-gray-300 w-1/3 text-right"
-                  >Password</label
-                >
-                <input
-                  id="password"
-                  type="password"
-                  v-model="user.password"
-                  placeholder="******************"
-                  class="input flex-1"
-                />
+              <div class="flex space-x-2">
+                <div class="w-1/2">
+                  <label
+                    for="password"
+                    class="text-gray-300 block text-left mb-1"
+                    >Password<span class="text-red-400">*</span></label
+                  >
+                  <input
+                    id="password"
+                    type="password"
+                    v-model="user.password"
+                    placeholder="******************"
+                    class="input w-full"
+                    required="required"
+                  />
+                  <div class="text-red-300 text-xs italic">
+                    {{ errors.password }}
+                  </div>
+                </div>
+                <div class="w-1/2">
+                  <label
+                    for="cPassword"
+                    class="text-gray-300 block text-left mb-1"
+                    >Repeat password<span class="text-red-400">*</span></label
+                  >
+                  <input
+                    id="cPassword"
+                    type="password"
+                    v-model="user.cPassword"
+                    placeholder="******************"
+                    class="input w-full"
+                    required="required"
+                  />
+                  <div class="text-red-300 text-xs italic">
+                    {{ errors.cPassword }}
+                  </div>
+                </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="cPassword" class="text-gray-300 w-1/3 text-right"
-                  >Repeat password</label
-                >
-                <input
-                  id="cPassword"
-                  type="password"
-                  v-model="user.cPassword"
-                  placeholder="******************"
-                  class="input flex-1"
-                />
-              </div>
-              <div class="flex items-center space-x-4">
-                <label for="phoneNumber" class="text-gray-300 w-1/3 text-right"
+              <div>
+                <label
+                  for="phoneNumber"
+                  class="text-gray-300 block text-left mb-1"
                   >Phone number</label
                 >
                 <input
                   id="phoneNumber"
                   type="text"
                   v-model="user.phoneNumber"
-                  placeholder="enter your phone number"
-                  class="input flex-1"
+                  placeholder="Enter your phone number"
+                  class="input w-full"
                 />
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="age" class="text-gray-300 w-1/3 text-right"
-                  >Age</label
-                >
-                <input
-                  id="age"
-                  type="number"
-                  v-model="user.age"
-                  placeholder="25"
-                  class="input flex-1"
-                />
+              <div class="flex space-x-2">
+                <div class="w-1/2">
+                  <label for="age" class="text-gray-300 block text-left mb-1"
+                    >Age</label
+                  >
+                  <input
+                    id="age"
+                    type="number"
+                    v-model="user.age"
+                    placeholder="25"
+                    class="input w-full"
+                  />
+                </div>
+                <div class="w-1/2">
+                  <label for="gender" class="text-gray-300 block text-left mb-1"
+                    >Gender</label
+                  >
+                  <select
+                    id="gender"
+                    class="input w-full"
+                    v-model="user.gender"
+                  >
+                    <option selected value="not specified">
+                      Not specified
+                    </option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="gender" class="text-gray-300 w-1/3 text-right"
-                  >Select your gender</label
-                >
-                <select id="gender" class="input flex-1" v-model="user.gender">
-                  <option selected value="not specified">Not specified</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-              <div class="flex items-center space-x-4">
-                <label for="country" class="text-gray-300 w-1/3 text-right"
-                  >Country</label
-                >
+              <div>
+                <label for="country" class="text-gray-300 block text-left mb-1"
+                  >Country
+                </label>
                 <select
                   id="country"
-                  class="input flex-1"
+                  class="input w-full"
                   v-model="user.country"
                   @change="fetchStates"
                 >
@@ -139,11 +197,11 @@
                   </option>
                 </select>
               </div>
-              <div class="flex items-center space-x-4">
-                <label for="state" class="text-gray-300 w-1/3 text-right"
+              <div>
+                <label for="state" class="text-gray-300 block text-left mb-1"
                   >State</label
                 >
-                <select id="state" class="input flex-1" v-model="user.state">
+                <select id="state" class="input w-full" v-model="user.state">
                   <option selected value="">Select State</option>
                   <option v-for="state in states" :key="state" :value="state">
                     {{ state }}
@@ -154,7 +212,7 @@
             <div class="flex justify-center">
               <button type="submit" class="btn">Signup</button>
             </div>
-            <p class="text-sm text-gray-300 text-center pt-5">
+            <p class="text-sm text-gray-300 text-center pt-4">
               Already have an account?
               <nuxt-link
                 to="/login"
@@ -168,10 +226,9 @@
     </div>
   </div>
 </template>
+
 <script>
 import axios from "axios";
-import { io } from "socket.io-client";
-
 export default {
   data() {
     return {
@@ -179,6 +236,7 @@ export default {
         firstname: "",
         lastname: "",
         username: "",
+        anonymousname: "",
         email: "",
         password: "",
         cPassword: "",
@@ -204,16 +262,11 @@ export default {
         const res = await axios.get(
           "https://api.first.org/data/v1/countries?limit=300"
         );
-        // this.countries = res.data.map((country) => country.country);
-        // console.log(this.countries);
         console.log(res.data.data);
         for (const key in res.data.data) {
           this.countries.push(res.data.data[key].country);
         }
-        console.log(this.countries);
-      } catch (err) {
-        console.log(err.message);
-      }
+      } catch (err) {}
     },
     async saveUser() {
       this.isLoading = true;
@@ -223,21 +276,33 @@ export default {
         const res = await axios.post(`http://localhost:8000/user`, this.user, {
           withCredentials: true,
         });
-        console.log(res.data.user.userId, "done");
+        console.log(res, "done");
+
         console.log(this.socket);
-        this.socket.emit("signUp", res.data.user.userId);
-        this.$router.push("/login");
+        this.$router.push("/verify");
       } catch (err) {
-        // this.errorsArr = err.response.data.Errors;
-        // this.processErrors();
-        // this.isLoading = false;
-        // this.isLoadingTitle = "Loading...";
         console.log(err.response);
-      }
-    },
-    processErrors() {
-      for (let key of this.errorsArr) {
-        this.errors[key.path[0]] = key.message;
+        if (err.response.data.message === "username is already exists") {
+          console.log("username is already exists");
+          this.errors.username = "username is already exists";
+        }
+        if (err.response.data.message === "Email is already exists") {
+          this.errors.email = "email is already exists";
+        }
+        if (err.response.data.message === "anonymousname is already exists") {
+          this.errors.anonymousname = "anonymous name is already exists";
+        } else if (err.response.data.message === "Validation Error") {
+          this.errorsArr = err.response.data.Errors;
+          for (let key of err.response.data.Errors[0]) {
+            if (key.message.startsWith(`"username" with value`))
+              this.errors.username =
+                "invalid user name, valid example: Example_User123";
+            else if (key.message.startsWith(`"cPassword" must be`))
+              this.errors.cPassword = "passwords do not match";
+            else this.errors[key.path[0]] = key.message;
+          }
+        }
+        this.isLoading = false;
       }
     },
     async fetchStates() {
@@ -253,7 +318,6 @@ export default {
         for (const key in res.data.data.states) {
           this.states.push(res.data.data.states[key].name);
         }
-        console.log(res.data);
       } catch (err) {
         console.log(err.message);
       }
@@ -261,17 +325,8 @@ export default {
   },
   mounted() {
     this.fetchCountries();
-    this.socket = io("http://localhost:8000");
-
-    this.socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-    this.socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-    this.socket.on("messageFromServer", (data) => {
-      this.message = data;
-    });
   },
 };
 </script>
+
+<style scoped></style>

@@ -79,6 +79,7 @@
 <script>
 import axios from "axios";
 import Cookies from "js-cookie";
+
 export default {
   computed: {
     token() {
@@ -107,7 +108,7 @@ export default {
           { withCredentials: true }
         );
         console.log(res, "dafsdfasdfafsd");
-
+        setAuthState(res.data.user);
         console.log(this.token, "you've done it");
         this.user.email = "";
         this.user.password = "";
